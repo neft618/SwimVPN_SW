@@ -45,3 +45,6 @@ fun GreetingPreview() {
         Greeting("Android")
     }
 }
+
+
+//////похуй мне
