@@ -22,6 +22,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.swimvpn.navigation.AppNavigation
 import com.example.swimvpn.ui.theme.SwimVPNTheme
 
+private val Any.Payment: ImageVector
+    get() {        TODO("Not yet implemented")
+    }
+private val Any.Storage: ImageVector
+    get() {
+        TODO("Not yet implemented")
+    }
+
 @Composable
 fun VpnApp() {
     SwimVPNTheme {

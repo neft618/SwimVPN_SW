@@ -40,7 +40,7 @@ fun AppNavigation(navController: NavHostController) {
             val serverViewModel: ServerViewModel = viewModel()
             ServerScreen(
                 serverViewModel = serverViewModel,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateToPayment = { navController.navigate(Screen.Payment.route) }
             )
         }
 
