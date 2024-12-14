@@ -9,8 +9,8 @@ import kotlinx.coroutines.launch
 
 // Data class to represent the UI state of the Home screen
 data class HomeUiState(
-    val downloadSpeed: String = "0 Mbps",
-    val uploadSpeed: String = "0 Mbps",
+    val downloadSpeed: String = "0 Mb/s",
+    val uploadSpeed: String = "0 Mb/s",
     val ping: String = "0 ms",
     val serverList: List<Server> = emptyList(),
     val isConnected: Boolean = false
