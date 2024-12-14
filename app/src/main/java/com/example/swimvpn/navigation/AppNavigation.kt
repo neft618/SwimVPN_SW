@@ -1,10 +1,12 @@
 package com.example.swimvpn.navigation
 
+import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.swimvpn.R
 import com.example.swimvpn.ui.main.HomeScreen
 import com.example.swimvpn.ui.servers.ServerScreen
 import com.example.swimvpn.ui.payment.PaymentScreen
@@ -12,11 +14,10 @@ import com.example.swimvpn.viewmodel.HomeViewModel
 import com.example.swimvpn.viewmodel.ServerViewModel
 import com.example.swimvpn.viewmodel.PaymentViewModel
 
-// Список маршрутов
-sealed class Screen(val route: String) {
-    object Home : Screen("home")
-    object Servers : Screen("servers")
-    object Payment : Screen("payment")
+sealed class Screen(val route: String, @DrawableRes val icon: Int) {
+    object Servers : Screen("servers", R.drawable.ic_servers)
+    object Home : Screen("home", R.drawable.ic_home)
+    object Payment : Screen("payment", R.drawable.ic_payment)
 }
 
 @Composable
