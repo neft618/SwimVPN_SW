@@ -1,6 +1,7 @@
 package com.example.swimvpn.ui.payment
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -157,22 +160,57 @@ fun TransparentOutlinedTextField(
 
 @Composable
 fun SubscriptionCard(plan: SubscriptionPlan, onClick: () -> Unit) {
-    Card(
+    // Условные градиенты
+    val gradientBrush = if (plan.isSelected) {
+        // Градиент для выбранной карточки
+        Brush.linearGradient(
+            colors = listOf(Color(0xFF2090AB), Color(0xFF161718)), // Активные цвета
+            start = Offset(0f, 0f),
+            end = Offset(0f, 330f)
+        )
+    } else {
+        // Градиент для невыбранной карточки (серый)
+        Brush.linearGradient(
+            colors = listOf(Color(0xFF929292), Color(0xFF141516)), // Серые цвета
+            start = Offset(0f, 0f),
+            end = Offset(0f, 330f)
+        )
+    }
+
+    Box(
         modifier = Modifier
             .width(100.dp)
-            .height(120.dp)
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = if (plan.isSelected) Color(0xFF1B5D6C) else Color(0xFF151617)
-        )
+            .height(140.dp)
+            .clickable(onClick = onClick)
+            .background(brush = gradientBrush, shape = RoundedCornerShape(12.dp)) // Градиентный фон
+            .padding(1.dp), // Отступ для создания "обводки"
+        contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        // Внутренний фон карточки
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    color = Color(0xFF191B1C), // Тёмный цвет внутреннего фона
+                    shape = RoundedCornerShape(10.dp) // Закруглённые углы
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Text(text = "${plan.duration} months", color = Color.White)
-            Text(text = "${plan.price} USD", color = Color.White)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "${plan.duration} months",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = "${plan.price} USD",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+            }
         }
     }
 }

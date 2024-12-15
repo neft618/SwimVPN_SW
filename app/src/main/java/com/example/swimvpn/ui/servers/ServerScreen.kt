@@ -27,7 +27,7 @@ fun ServerScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Color(0xFF191A1B))
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
