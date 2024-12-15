@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.swimvpn.ui.theme.GeneralSans
 import com.example.swimvpn.viewmodel.ServerViewModel
 
 @Composable
@@ -30,48 +31,17 @@ fun ServerScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(250.dp))
         Text(
-            text = "Devices",
+            text = "SOON",
             color = Color.White,
-            fontSize = 20.sp,
+            fontSize = 60.sp,
+            fontFamily = GeneralSans,
             modifier = Modifier.padding(bottom = 16.dp)
+
         )
 
-        // Список серверов
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.weight(1f)
-        ) {
-            items(uiState.serverList.size) { index ->
-                val server = uiState.serverList[index]
-                ServerItem(
-                    serverName = server.country,
-                    isSelected = server.isSelected,
-                    onClick = { serverViewModel.selectServer(server) }
-                )
-            }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = onNavigateToPayment) {
-            Text(text = "Go to Payment", color = Color.White)
-        }
-    }
-}
-
-@Composable
-fun ServerItem(serverName: String, isSelected: Boolean, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) Color.Cyan else Color.Gray
-        )
-    ) {
-        Text(text = serverName, color = Color.Black)
     }
 }
 

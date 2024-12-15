@@ -10,6 +10,7 @@ import com.example.swimvpn.R
 import com.example.swimvpn.ui.main.HomeScreen
 import com.example.swimvpn.ui.servers.ServerScreen
 import com.example.swimvpn.ui.payment.PaymentScreen
+import com.example.swimvpn.viewmodel.AuthViewModel
 import com.example.swimvpn.viewmodel.HomeViewModel
 import com.example.swimvpn.viewmodel.ServerViewModel
 import com.example.swimvpn.viewmodel.PaymentViewModel
@@ -29,11 +30,7 @@ fun AppNavigation(navController: NavHostController) {
         // Экран "Домашняя страница"
         composable(route = Screen.Home.route) {
             val homeViewModel: HomeViewModel = viewModel()
-            HomeScreen(
-                homeViewModel = homeViewModel,
-                onNavigateToServers = { navController.navigate(Screen.Servers.route) },
-                onNavigateToPayment = { navController.navigate(Screen.Payment.route) }
-            )
+            HomeScreen(homeViewModel = homeViewModel)
         }
 
         // Экран "Серверы"
@@ -48,9 +45,12 @@ fun AppNavigation(navController: NavHostController) {
         // Экран "Оплата"
         composable(route = Screen.Payment.route) {
             val paymentViewModel: PaymentViewModel = viewModel()
+            val authViewModel: AuthViewModel = viewModel()
             PaymentScreen(
                 paymentViewModel = paymentViewModel,
-                onNavigateBack = { navController.popBackStack() }
+                authViewModel = authViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onLoginSuccess = { /* Handle login success */ }
             )
         }
     }

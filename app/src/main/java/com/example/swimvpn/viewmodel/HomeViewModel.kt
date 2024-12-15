@@ -1,48 +1,73 @@
 package com.example.swimvpn.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.content.Intent
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.swimvpn.data.database.ProxyDatabaseHelper
 import com.example.swimvpn.data.model.Server
+import com.example.swimvpn.service.ProxyVpnService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
-// Data class to represent the UI state of the Home screen
 data class HomeUiState(
     val downloadSpeed: String = "0 Mb/s",
     val uploadSpeed: String = "0 Mb/s",
     val ping: String = "0 ms",
     val serverList: List<Server> = emptyList(),
-    val isConnected: Boolean = false
+    val isConnected: Boolean = false,
+    val elapsedTime: Long = 0L
 )
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
-    // Mutable state for the UI
+    private val proxyDatabaseHelper = ProxyDatabaseHelper(application)
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
 
-    // Toggle VPN connection status
+    private var selectedServer: Server? = null
+
+    init {
+        loadServers()
+        startTimer()
+    }
+
+    private fun loadServers() {
+        viewModelScope.launch {
+            val servers = proxyDatabaseHelper.getAllServers()
+            _uiState.value = _uiState.value.copy(serverList = servers)
+            selectedServer = servers.firstOrNull { it.isSelected } ?: servers.firstOrNull()
+        }
+    }
+
     fun toggleVpnConnection() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isConnected = !_uiState.value.isConnected
-            )
+        selectedServer?.let { server ->
+            val context = getApplication<Application>()
+            val intent = Intent(context, ProxyVpnService::class.java).apply {
+                putExtra("ip", server.ip)
+                putExtra("port", server.port)
+                putExtra("password", server.password)
+            }
+
+            if (_uiState.value.isConnected) {
+                context.stopService(intent)
+                _uiState.value = _uiState.value.copy(isConnected = false, elapsedTime = 0L)
+            } else {
+                context.startService(intent)
+                _uiState.value = _uiState.value.copy(isConnected = true)
+            }
         }
     }
 
-    // Select a server from the server list
-    fun selectServer(selectedServer: Server) {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                serverList = _uiState.value.serverList.map { server ->
-                    server.copy(isSelected = server == selectedServer)
-                }
-            )
-        }
+    fun selectServer(server: Server) {
+        selectedServer = server
+        _uiState.value = _uiState.value.copy(
+            serverList = _uiState.value.serverList.map { it.copy(isSelected = it == server) }
+        )
     }
 
-    // Update the download speed, upload speed, and ping (mock example)
     fun updateConnectionMetrics(download: String, upload: String, ping: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
@@ -53,16 +78,14 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    // Simulate loading server list (replace with real data source)
-    fun loadServers() {
+    private fun startTimer() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                serverList = listOf(
-                    Server(id = "1", country = "USA", isSelected = true),
-                    Server(id = "2", country = "Germany"),
-                    Server(id = "3", country = "Japan")
-                )
-            )
+            while (true) {
+                delay(1000L)
+                if (_uiState.value.isConnected) {
+                    _uiState.value = _uiState.value.copy(elapsedTime = _uiState.value.elapsedTime + 1)
+                }
+            }
         }
     }
 }

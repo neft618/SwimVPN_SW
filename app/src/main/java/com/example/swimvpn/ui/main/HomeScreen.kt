@@ -10,11 +10,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.swimvpn.viewmodel.HomeViewModel
@@ -24,74 +24,44 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel,
-    onNavigateToServers: () -> Unit,
-    onNavigateToPayment: () -> Unit
+    homeViewModel: HomeViewModel
 ) {
     val uiState = homeViewModel.uiState.collectAsState().value
-    var isVpnConnected by remember { mutableStateOf(false) }
-    var elapsedTime by remember { mutableStateOf(0L) }
-
-    LaunchedEffect(isVpnConnected) {
-        if (isVpnConnected) {
-            while (true) {
-                delay(1000L)
-                elapsedTime += 1
-            }
-        } else {
-            elapsedTime = 0L
-        }
-    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF191A1B))
-            .padding(16.dp), // Отступы от краев экрана
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(18.dp))
-        Text("Secure Waters", color = Color.White, fontSize = 24.sp, fontFamily = GeneralSans)
+        Text(
+            text = "Secure Waters",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontFamily = GeneralSans
+        )
         Spacer(modifier = Modifier.height(50.dp))
 
-        // Реальные метрики подключения
+        // Метрики подключения
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 25.dp) // Отступы от краев экрана
-             // Распределение метрик по всей ширине
+                .padding(horizontal = 25.dp),
+            horizontalArrangement = Arrangement.SpaceAround
         ) {
-            ConnectionMetric(
-                label = "Download",
-                value = uiState.downloadSpeed,
-                iconResId = R.drawable.ic_download
-            )
-            Spacer(modifier = Modifier.width(50.dp)) // Пробел между метриками
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                ConnectionMetric(
-                    label = "Upload",
-                    value = uiState.uploadSpeed,
-                    iconResId = R.drawable.ic_upload
-                )
-            }
-            Spacer(modifier = Modifier.width(60.dp)) // Пробел между метриками
-            ConnectionMetric(
-                label = "Ping",
-                value = uiState.ping,
-                iconResId = R.drawable.ic_ping
-            )
+            ConnectionMetric(label = "Download", value = uiState.downloadSpeed, iconResId = R.drawable.ic_download)
+            ConnectionMetric(label = "Upload", value = uiState.uploadSpeed, iconResId = R.drawable.ic_upload)
+            ConnectionMetric(label = "Ping", value = uiState.ping, iconResId = R.drawable.ic_ping)
         }
 
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
-        // Секундомер
-        val hours = (elapsedTime / 3600).toString().padStart(2, '0')
-        val minutes = ((elapsedTime % 3600) / 60).toString().padStart(2, '0')
-        val seconds = (elapsedTime % 60).toString().padStart(2, '0')
+        // Таймер соединения
+        val hours = (uiState.elapsedTime / 3600).toString().padStart(2, '0')
+        val minutes = ((uiState.elapsedTime % 3600) / 60).toString().padStart(2, '0')
+        val seconds = (uiState.elapsedTime % 60).toString().padStart(2, '0')
         Text(
             text = "$hours:$minutes:$seconds",
             color = Color.White,
@@ -101,16 +71,13 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Кнопка включения VPN с изображением и закругленными краями
+        // Кнопка подключения
         Box(
             modifier = Modifier
                 .size(200.dp)
                 .clip(RoundedCornerShape(52.dp))
-                .background(Color(0xFF2C96AD))
-                .clickable {
-                    isVpnConnected = !isVpnConnected
-                    homeViewModel.toggleVpnConnection()
-                },
+                .background(Color.Transparent)
+                .clickable { homeViewModel.toggleVpnConnection() },
             contentAlignment = Alignment.Center
         ) {
             Image(
@@ -118,14 +85,14 @@ fun HomeScreen(
                 contentDescription = null,
                 modifier = Modifier
                     .size(200.dp)
-                    .clip(RoundedCornerShape(16.dp)),
+                    .alpha(if (uiState.isConnected) 1f else 0.5f),
                 contentScale = ContentScale.Crop
             )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Список стран
+        // Список серверов
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
@@ -142,10 +109,11 @@ fun HomeScreen(
     }
 }
 
+
+
 @Composable
 fun ConnectionMetric(label: String, value: String, iconResId: Int) {
     Column(
-        modifier = Modifier.padding(horizontal = 8.dp), // Отступы между метриками
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
@@ -156,7 +124,7 @@ fun ConnectionMetric(label: String, value: String, iconResId: Int) {
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = label,
-            color = Color(0xFF929292),
+            color = Color(0xFF888889),
             fontSize = 16.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -175,12 +143,12 @@ fun CountrySelector(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) Color.Cyan else Color.Gray
+    val backgroundColor = if (isSelected) Color(0xFF1B5D6C) else Color(0xFF151617)
     Box(
         modifier = Modifier
             .padding(8.dp)
-            .size(80.dp)
-            .background(color = backgroundColor, shape = RoundedCornerShape(16.dp))
+            .size(70.dp)
+            .background(color = backgroundColor, shape = RoundedCornerShape(30.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
